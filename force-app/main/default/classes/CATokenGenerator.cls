@@ -3,7 +3,7 @@ public with sharing class CATokenGenerator {
     public CATokenGenerator() {
 
     }
-
+    // When using secure credentials in custom LWCs, the values can be stored in in Custom Metadata, Custom Settings, Named Credentials, or Protected Custom Metadata. This example is using Custom Metadata.
     private static TableauConnectedApp__mdt ca;
     private static String ts_ca_iss;
     private static String ts_ca_kid;
@@ -14,9 +14,7 @@ public with sharing class CATokenGenerator {
         // DeveloperName is unique id
         List<TableauConnectedApp__mdt> tabEnv = [SELECT DeveloperName, secret__c, kid__c, clientId__c, SiteName__c, TableauCloud__c  FROM TableauConnectedApp__mdt];
     
-        // Log the ca at index 0
         System.debug('tabEnv: ' + tabEnv[0]);
-        // TODO: improve to select using 'SiteName__c' value instead of assuming 1 env and index 0
         ca = tabEnv[0];
         ts_ca_iss = ca.clientId__c;
         ts_ca_kid = ca.kid__c;
@@ -36,25 +34,7 @@ public with sharing class CATokenGenerator {
         return views;
     }
 
-    // Get views from custom metadata
-    @AuraEnabled(cacheable=false)
-    public static List<TableauMetric__mdt> getMetrics() {
-        // DeveloperName is unique id
-        List<TableauMetric__mdt> metrics = [SELECT DeveloperName, metricId__c, metricName__c FROM TableauMetric__mdt];
-    
-        // Log the entire list of views
-        System.debug('Metrics: ' + metrics);
-        return metrics;
-    }
 
-    
-
-    // Returns user's email & division (Map)
-    // @AuraEnabled annotation makes the method accessible via LWC
-
-    /* 
-    Partner/Community/Experience Cloud users are associated with a Contact, which has a relationship to an Account. 
-    */
     @AuraEnabled(cacheable=false)
     public static Map<String, String> getUserDetails() {
         // Get the user's division, email, and account name
@@ -80,39 +60,6 @@ public with sharing class CATokenGenerator {
     public static List<String> convertStringToList(String input) {
         return input.split(',\\s*');
     }
-
-    // helper to get authenticated user's Division field for UAF
-    public static String getCurrentUserDivision() {
-        User currentUser = [SELECT Division FROM User WHERE Id = :UserInfo.getUserId()];
-        return currentUser.Division;
-    }
-
-    // helper to get authenticated user's Account Name field for UAF
-    public static String getCurrentUserAccountName() {
-        User currentUser = [SELECT Email, Division, ContactId FROM User WHERE Id = :UserInfo.getUserId()];
-        String accountName = '';
-        if (currentUser.ContactId != null) {
-            // Query the Contact to get the Account Name
-            Contact userContact = [SELECT Account.Name FROM Contact WHERE Id = :currentUser.ContactId];
-            accountName = userContact.Account.Name;
-        }
-        return accountName;
-    }
-
-
-             
-
-    @AuraEnabled(cacheable=false)
-    public static List<Opportunity> getCurrentUserOpportunities() {
-    // Query to fetch opportunities where the current user is the owner
-    List<Opportunity> opps = [SELECT Id, Name, CloseDate, Amount FROM Opportunity WHERE OwnerId = :UserInfo.getUserId()];
-    return opps;
-    }
-
-
-
-
-    
 
     // helper to get aauthenticated user's username
     public static String getCurrentUserUsername() {
@@ -160,9 +107,6 @@ public with sharing class CATokenGenerator {
         // get secret, secret_id, client_id from custom meta data object 
         getTableauEnvConfig();
 
-        // getCurrentUserOpportunities();
-
-
         // Header (Map)
         Map<String, String> header = new Map<String, String>();
         header.put('alg', 'HS256');
@@ -185,10 +129,7 @@ public with sharing class CATokenGenerator {
         claims.put('sub', getCurrentUserUsername());
         List<String> scp = getTableauClaims(tokenType);
         claims.put('scp', scp);
-        String uafValues = getCurrentUserAccountName();
-        List<String> uafValuesList = convertStringToList(uafValues);
-        claims.put('Account Name', uafValuesList);
-        // uafValues = getCurrentUserDivision();
+       
         // uafValuesList = convertStringToList(uafValues);
         // claims.put('Region', uafValuesList);
         // Encode Header and Claims
