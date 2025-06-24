@@ -58,7 +58,6 @@ export default class VizEmbed extends NavigationMixin(LightningElement)  {
                 this.server = result[0].TableauCloud__c;
                 this.site = result[0].SiteName__c;
                 
-                
                 // Third Apex call getViews
                 return getUserDetails();
             })
@@ -74,7 +73,7 @@ export default class VizEmbed extends NavigationMixin(LightningElement)  {
                 // Handle the result from the second call
                 this.jwt = result;
                 console.log('JWT: ' + this.jwt);
-                console.log('Link to decode JWT: https://jwt.io/#debugger-io?token=' + this.jwt);
+                console.log('Link to decode token: https://jwt.io/#debugger-io?token=' + this.jwt);
                 
                 // Third Apex call getViews
                 return getViews();
@@ -148,28 +147,14 @@ export default class VizEmbed extends NavigationMixin(LightningElement)  {
         console.log('this.vizUrl:', this.vizUrl);
         console.log('container:', container);
 
-        if (fromMenuClick) {
-            console.log('Generating JWT after menu click');
-            generateJWT({ tokenType: this.tokenType })
-                .then(result => {
-                // Handle the result
-                this.jwt = result;
-                console.log('JWT: ' + this.jwt);
-                console.log('Link to decode JWT: https://jwt.io/#debugger-io?token=' + this.jwt);
-            })
-            .catch(error => {
-                // Handle error
-                console.log("error: " + JSON.stringify(error));
-            });
-        }
-
+        
         if (container) {
             // set viz properties
             container.height = '1000px';
             container.width = '100%';
             container.token = this.jwt;
             container.src = this.vizUrl;
-            container.toolbar = 'hidden';
+            container.toolbar = 'top';
             container.hideTabs = true;
             container.toolbar = 'hidden';
 
@@ -193,12 +178,9 @@ export default class VizEmbed extends NavigationMixin(LightningElement)  {
                 this.sheet = this.viz.workbook.activeSheet;
                 console.log("sheet name: " + this.sheet.name);
                 console.log('sheetType: ' + this.sheet.sheetType);
-
                 this.targetSheet = this.sheet.worksheets.find(ws => ws.name === "Sale Map");
                 console.log("targetSheet: " + this.targetSheet);
             });
-
         }
     }
-
 }

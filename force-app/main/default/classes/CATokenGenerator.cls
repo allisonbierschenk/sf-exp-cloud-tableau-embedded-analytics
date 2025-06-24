@@ -3,7 +3,8 @@ public with sharing class CATokenGenerator {
     public CATokenGenerator() {
 
     }
-    // When using secure credentials in custom LWCs, the values can be stored in in Custom Metadata, Custom Settings, Named Credentials, or Protected Custom Metadata. This example is using Custom Metadata.
+    // When using secure credentials in custom LWCs, the values can be stored in in Custom Metadata, Custom Settings, Named Credentials, or Protected Custom Metadata. 
+    // This example is using Custom Metadata.
     private static TableauConnectedApp__mdt ca;
     private static String ts_ca_iss;
     private static String ts_ca_kid;
@@ -131,7 +132,19 @@ public with sharing class CATokenGenerator {
         claims.put('scp', scp);
        
         // uafValuesList = convertStringToList(uafValues);
-        // claims.put('Region', uafValuesList);
+        // claims.put('Agent Name', uafValuesList);
+
+        String currentUserEmail = getCurrentUserUsername(); 
+       
+        if (currentUserEmail == 'justinchen@demo.com'){
+            String uafValuesFINS = 'Justin Chen';
+            List<String> uafValuesListFINS = convertStringToList(uafValuesFINS);
+            claims.put('Agent Name', uafValuesListFINS);
+            String uafValuesRegion = 'East';
+            List<String> uafValuesListRegion = convertStringToList(uafValuesRegion);
+            claims.put('Region', uafValuesListRegion);
+        }
+
         // Encode Header and Claims
         String encodedHeader = base64UrlEncode(Blob.valueOf(JSON.serialize(header)));
         String encodedClaims = base64UrlEncode(Blob.valueOf(JSON.serialize(claims)));

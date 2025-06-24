@@ -58,7 +58,7 @@ export default class VizWebAuthoring extends NavigationMixin(LightningElement) {
 
     get vizUrl() {
         if (this.server && this.site) {
-            return `${this.server}/t/${this.site}/authoringNewWorkbook/${this.guid}/Joined`;
+            return `${this.server}/t/${this.site}/authoringNewWorkbook/${this.guid}/Sample-Superstore-RegionUAF`;
         }
         console.log("Missing required parameters for vizUrl");
         return '';
